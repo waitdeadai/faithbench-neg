@@ -12,17 +12,17 @@ from .core import Item, Negative
 
 
 def propose(item: Item) -> list[Negative]:
-    s = item.faithful_statement
+    s = item.faithful
     return [
         Negative(
             class_id="conclusion_as_axiom",
-            statement="-- TODO(human): add the goal as a hypothesis `(h : <goal>)`, then weaken the goal\n" + s,
+            artifact="-- TODO(human): add the goal as a hypothesis `(h : <goal>)`, then weaken the goal\n" + s,
             note="machine-proposed skeleton; MUST be type-checked and human-verified before use",
             label_status="machine_proposed",
         ),
         Negative(
             class_id="vacuous",
-            statement="-- TODO(human): replace the goal term with `True`\n" + s,
+            artifact="-- TODO(human): replace the goal term with `True`\n" + s,
             note="machine-proposed skeleton; MUST be type-checked and human-verified before use",
             label_status="machine_proposed",
         ),

@@ -91,4 +91,36 @@ only **high-precision** patterns (0% false-positive on the seed's faithful state
 > most useful as a **regression gate on an autoformalizer that already has gold targets**,
 > and as a cheap pre-filter elsewhere.
 
+## Universal: domains (not math-only)
+
+faithbench is a **domain-pluggable framework**. The item model, scorer, and CLI
+are domain-agnostic; everything domain-specific lives behind one interface
+(`faithbench/domains/`): a failure-class taxonomy, a deterministic
+`structural(artifact, context)` "cheap gate", and a `reference_diff` against a
+gold artifact. Adding a domain = implement that interface and `register()`.
+
+```bash
+python -m faithbench domains                      # list registered domains
+python -m faithbench score data/seed              # lean_math (auto-detected)
+python -m faithbench score data/seed_tool_call    # tool_call
+python -m faithbench lint --domain tool_call --context tools.json '{"tool":"get_weather","arguments":{"unit":"kelvin"}}'
+```
+
+Two domains ship, and they make the central point measurable: **how much of
+faithfulness is deterministically checkable depends entirely on how strong the
+domain's cheap gate is.**
+
+| domain | cheap gate | reference-free reach | irreducibly-semantic class | data |
+|---|---|---|---|---|
+| `lean_math` | Lean type-check | **2 / 6** classes | `answer_leaking` | needs human Lean+math labeling |
+| `tool_call` | JSON-schema validity (pure code) | **5 / 6** classes | `intent_drift` | **self-verifying** (machine-decidable) |
+
+The `tool_call` domain (agent / function-call faithfulness) is the cleaner proof:
+because schema validity is decidable by code, its structural negatives need **no
+human labeling** — the seed is `machine_verified`. Every domain still has exactly
+one class that is "valid but means the wrong thing" and needs a semantic judge —
+`answer_leaking` for math, `intent_drift` for tool calls. That is the honest,
+universal shape: **valid ≠ faithful; the deterministic suite catches the cheap
+violations for free and escalates the one semantic class.**
+
 License: Apache-2.0.

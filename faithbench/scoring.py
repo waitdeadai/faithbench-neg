@@ -1,30 +1,29 @@
-"""Per-failure-class catch-rate scoring — the core deliverable.
+"""Per-failure-class catch-rate scoring — domain-agnostic.
 
 For each checker, per failure class, report the fraction of KNOWN-unfaithful
 negatives it correctly flags (catch-rate), plus a false-positive ('cry-wolf')
-rate on the faithful statements. The headline result is *divergence*: checkers
-with similar aggregate numbers can have very different per-class blind spots,
-which aggregate meta-eval numbers hide.
+rate on the faithful artifacts. The headline is *divergence*: checkers with
+similar aggregate numbers can have very different per-class blind spots.
 """
 from __future__ import annotations
 
-from .core import FAILURE_CLASSES, Item
+from .core import Item
 
 
 def score(items: list[Item], checkers) -> dict:
-    classes: dict[str, dict[str, list[int]]] = {}   # class -> checker -> [catches, total]
-    fp: dict[str, list[int]] = {c.name: [0, 0] for c in checkers}  # checker -> [fp, total_faithful]
+    classes: dict[str, dict[str, list[int]]] = {}     # class -> checker -> [catches, total]
+    fp: dict[str, list[int]] = {c.name: [0, 0] for c in checkers}
     for it in items:
         for ch in checkers:
             fp[ch.name][1] += 1
-            if not ch.classify(it.nl_problem, it.faithful_statement):
-                fp[ch.name][0] += 1  # flagged a faithful statement -> cry wolf
+            if not ch.classify(it, it.faithful):
+                fp[ch.name][0] += 1  # flagged a faithful artifact -> cry wolf
         for neg in it.negatives:
             row = classes.setdefault(neg.class_id, {})
             for ch in checkers:
                 cell = row.setdefault(ch.name, [0, 0])
                 cell[1] += 1
-                if not ch.classify(it.nl_problem, neg.statement):
+                if not ch.classify(it, neg.artifact):
                     cell[0] += 1  # correctly flagged unfaithful -> catch
     return {"classes": classes, "false_positive": fp, "checkers": [c.name for c in checkers]}
 
@@ -46,13 +45,14 @@ def aggregate(report: dict) -> dict:
     return agg
 
 
-def format_table(report: dict) -> str:
+def format_table(report: dict, class_order: list[str] | None = None) -> str:
     names = report["checkers"]
     classes = report["classes"]
+    order = class_order or list(classes)
     label_w = max([len(k) for k in classes] + [len("cry-wolf (FP on faithful)")]) + 2
     head = "failure class".ljust(label_w) + "".join(f"{n:>14}" for n in names) + f"{'n':>6}"
     lines = [head, "-" * len(head)]
-    for cid in FAILURE_CLASSES:
+    for cid in order:
         row = classes.get(cid)
         if not row:
             continue

@@ -1,12 +1,11 @@
-"""Faithfulness checkers.
+"""Faithfulness checkers (domain-agnostic interface).
 
-A checker answers one question: is this Lean statement a FAITHFUL rendering of
-the informal problem? `classify` returns True for faithful, False for unfaithful.
-The benchmark scores a checker by how many KNOWN-unfaithful negatives it flags
-(per failure class). Every negative type-checks by construction, so a
-type-check-only gate catches nothing — that blind spot is the point.
+A checker answers: is this artifact a FAITHFUL rendering of the item's intent?
+`classify(item, artifact)` returns True for faithful. It receives the whole Item
+so it can use the domain + context (e.g. a tool schema). The benchmark scores a
+checker by how many KNOWN-unfaithful negatives it flags, per failure class.
 
-Real checkers (LLM judge, BEq+) are intentionally left as raising stubs rather
+Real semantic checkers (LLM judge, BEq+) are intentionally raising stubs rather
 than fabricating results.
 """
 from __future__ import annotations
@@ -15,34 +14,40 @@ import os
 import re
 from typing import Protocol
 
-from ..lint import run_suite
-
 
 class Checker(Protocol):
     name: str
-    def classify(self, nl_problem: str, statement: str) -> bool: ...
+    def classify(self, item, artifact) -> bool: ...
 
 
 class TypeCheckOnly:
-    """Models a gate that only asks 'does it compile?'. Everything in the
-    benchmark compiles, so this returns faithful=True always and is expected to
-    score 0% catch-rate on every class — the headline blind spot."""
+    """Models a 'does it pass the cheap gate?' baseline that always says faithful.
+    Expected to score 0% on every class — the headline blind spot."""
     name = "type_check"
 
-    def classify(self, nl_problem: str, statement: str) -> bool:
+    def classify(self, item, artifact) -> bool:
         return True
 
 
 class MockJudge:
-    """Deterministic TOY judge for wiring/CI only — NOT a real semantic check.
-    Flags as unfaithful any statement whose goal is literally `True` (the vacuous
-    class). Exists so the scorer and tests run end-to-end and to demonstrate
-    per-class divergence. Replace with LLMJudge for real evaluation."""
+    """Deterministic TOY judge (lean_math only) for wiring/CI. Flags `True`
+    goals. Not a real semantic check."""
     name = "mock_judge"
     _vacuous = re.compile(r"\bTrue\b")
 
-    def classify(self, nl_problem: str, statement: str) -> bool:
-        return self._vacuous.search(statement) is None
+    def classify(self, item, artifact) -> bool:
+        return self._vacuous.search(str(artifact)) is None
+
+
+class FaithLint:
+    """The deterministic structural slice for the item's DOMAIN. Reproducible,
+    no LLM: unfaithful when any structural check fires. Blind to each domain's
+    irreducibly-semantic class by design — that blind spot is the honest point."""
+    name = "faithlint"
+
+    def classify(self, item, artifact) -> bool:
+        from ..domains import get_domain
+        return not get_domain(item.domain).structural(artifact, item.context)
 
 
 class LLMJudge:
@@ -52,34 +57,22 @@ class LLMJudge:
     def __init__(self, model: str | None = None):
         self.model = model or os.environ.get("FAITHBENCH_JUDGE_MODEL", "")
 
-    def classify(self, nl_problem: str, statement: str) -> bool:
+    def classify(self, item, artifact) -> bool:
         raise NotImplementedError(
             "LLMJudge is a stub. Implement an API call that asks the model whether "
-            "`statement` faithfully formalizes `nl_problem`, returning a boolean. "
+            "`artifact` faithfully renders `item.intent`, returning a boolean. "
             "Left unimplemented on purpose so results are never fabricated.")
 
 
 class BEqPlus:
     """BEq+ symbolic equivalence (Poiroux et al., EMNLP 2025) via LeanInteract.
-    Requires a Lean 4 toolchain + LeanInteract; not bundled, stub by design."""
+    lean_math only; requires a Lean toolchain. Stub by design."""
     name = "beq_plus"
 
-    def classify(self, nl_problem: str, statement: str) -> bool:
+    def classify(self, item, artifact) -> bool:
         raise NotImplementedError(
-            "BEqPlus requires a Lean 4 toolchain + LeanInteract (beq_plus.py). "
-            "See README. Not stubbed with fake results by design.")
-
-
-class FaithLint:
-    """Deterministic structural linter suite (faithbench.lint), wrapped as a
-    checker. Reproducible, no LLM: flags unfaithful when any reference-free
-    linter fires (vacuous / false-hypothesis / self-axiom). Blind by design to
-    the semantic classes — that blind spot is the honest point, and shows up as
-    0% catch-rate on those classes in the per-class table."""
-    name = "faithlint"
-
-    def classify(self, nl_problem: str, statement: str) -> bool:
-        return not run_suite(statement)
+            "BEqPlus requires a Lean 4 toolchain + LeanInteract. Not stubbed with "
+            "fake results by design.")
 
 
 REGISTRY = {c.name: c for c in (TypeCheckOnly, MockJudge, FaithLint, LLMJudge, BEqPlus)}

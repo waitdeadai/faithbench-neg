@@ -1,0 +1,28 @@
+{
+  "id": "tc-0001",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {"note": "self-verifying: structural negatives are decidable by JSON-schema validation, no human labeling needed"},
+  "intent": "What's the weather in Paris in Celsius?",
+  "context": {
+    "tools": [
+      {"name": "get_weather",
+       "parameters": {
+         "type": "object",
+         "properties": {
+           "location": {"type": "string"},
+           "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+         },
+         "required": ["location"]}}
+    ]
+  },
+  "faithful": {"tool": "get_weather", "arguments": {"location": "Paris", "unit": "celsius"}},
+  "negatives": [
+    {"class": "wrong_tool", "artifact": {"tool": "get_forecast", "arguments": {"location": "Paris"}}, "note": "tool not in catalog"},
+    {"class": "missing_required_arg", "artifact": {"tool": "get_weather", "arguments": {"unit": "celsius"}}, "note": "required 'location' omitted"},
+    {"class": "wrong_arg_type", "artifact": {"tool": "get_weather", "arguments": {"location": 123, "unit": "celsius"}}, "note": "location is a number, schema wants string"},
+    {"class": "unexpected_arg", "artifact": {"tool": "get_weather", "arguments": {"location": "Paris", "unit": "celsius", "days": 5}}, "note": "'days' not declared"},
+    {"class": "enum_violation", "artifact": {"tool": "get_weather", "arguments": {"location": "Paris", "unit": "kelvin"}}, "note": "unit outside enum"},
+    {"class": "intent_drift", "artifact": {"tool": "get_weather", "arguments": {"location": "London", "unit": "celsius"}}, "note": "schema-VALID but wrong city — semantic; structural is blind, needs gold/judge"}
+  ]
+}
