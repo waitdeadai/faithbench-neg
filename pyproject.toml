@@ -1,0 +1,22 @@
+[project]
+name = "faithbench-neg"
+version = "0.1.0"
+description = "Per-failure-class adversarial-negatives benchmark + mutation harness for Lean 4 statement-autoformalization faithfulness"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+keywords = ["autoformalization", "lean4", "theorem-proving", "benchmark", "evaluation", "faithfulness"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+faithbench = "faithbench.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["faithbench", "faithbench.adapters"]

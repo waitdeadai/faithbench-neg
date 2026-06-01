@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/waitdeadai/faithbench-neg/schema/item.schema.json",
+  "title": "faithbench-neg item",
+  "type": "object",
+  "required": ["id", "nl_problem", "faithful_statement", "negatives"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {"type": "string"},
+    "nl_problem": {"type": "string", "description": "Informal problem statement."},
+    "faithful_statement": {"type": "string", "description": "Human-verified faithful Lean 4 statement that type-checks."},
+    "label_status": {"enum": ["UNVERIFIED_EXAMPLE", "human_verified", "machine_proposed"]},
+    "source": {"type": "object"},
+    "negatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["class", "statement"],
+        "properties": {
+          "class": {"enum": ["vacuous", "answer_leaking", "quantifier_swapped", "premise_mistranslated", "conclusion_as_axiom", "domain_type_mismatch"]},
+          "statement": {"type": "string", "description": "Plausible Lean 4 statement that TYPE-CHECKS but is unfaithful."},
+          "note": {"type": "string"},
+          "label_status": {"enum": ["UNVERIFIED_EXAMPLE", "human_verified", "machine_proposed"]}
+        }
+      }
+    }
+  }
+}

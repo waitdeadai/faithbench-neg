@@ -1,0 +1,13 @@
+{
+  "id": "ex-0001",
+  "label_status": "UNVERIFIED_EXAMPLE",
+  "source": {"note": "ILLUSTRATIVE PLACEHOLDER — not a verified item; Lean code has NOT been type-checked"},
+  "nl_problem": "Determine all real numbers x such that x^2 = 4.",
+  "faithful_statement": "theorem ex0001 (x : ℝ) : x ^ 2 = 4 ↔ x = 2 ∨ x = -2 := by sorry",
+  "negatives": [
+    {"class": "answer_leaking", "statement": "theorem ex0001 : (2 : ℝ) ^ 2 = 4 ∨ (-2 : ℝ) ^ 2 = 4 := by sorry", "note": "bakes in the answer; no longer 'determine all x'"},
+    {"class": "vacuous", "statement": "theorem ex0001 (x : ℝ) : True := by sorry", "note": "goal replaced by True"},
+    {"class": "quantifier_swapped", "statement": "theorem ex0001 : ∃ x : ℝ, x ^ 2 = 4 ↔ x = 2 ∨ x = -2 := by sorry", "note": "∀ over x turned into ∃"},
+    {"class": "premise_mistranslated", "statement": "theorem ex0001 (x : ℝ) (h : x > 0) : x ^ 2 = 4 ↔ x = 2 ∨ x = -2 := by sorry", "note": "spurious positivity hypothesis added"}
+  ]
+}

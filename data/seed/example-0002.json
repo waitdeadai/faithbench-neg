@@ -1,0 +1,11 @@
+{
+  "id": "ex-0002",
+  "label_status": "UNVERIFIED_EXAMPLE",
+  "source": {"note": "ILLUSTRATIVE PLACEHOLDER — not a verified item; Lean code has NOT been type-checked"},
+  "nl_problem": "Show that for every natural number n, n + 0 = n.",
+  "faithful_statement": "theorem ex0002 (n : ℕ) : n + 0 = n := by sorry",
+  "negatives": [
+    {"class": "domain_type_mismatch", "statement": "theorem ex0002 (n : ℤ) : n + 0 = n := by sorry", "note": "ℤ instead of ℕ"},
+    {"class": "conclusion_as_axiom", "statement": "theorem ex0002 (n : ℕ) (h : n + 0 = n) : n + 0 = n := by exact h", "note": "goal assumed as a hypothesis (circular)"}
+  ]
+}
