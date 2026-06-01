@@ -1,0 +1,103 @@
+{
+  "id": "tc-gen-create_event",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Event 'Standup'",
+  "context": {
+    "tools": [
+      {
+        "name": "create_event",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "public",
+                "private"
+              ]
+            }
+          },
+          "required": [
+            "title"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "create_event",
+    "arguments": {
+      "title": "Standup",
+      "visibility": "private"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "title": "Standup",
+          "visibility": "private"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "create_event",
+        "arguments": {
+          "visibility": "private"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "create_event",
+        "arguments": {
+          "title": 123,
+          "visibility": "private"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "create_event",
+        "arguments": {
+          "title": "Standup",
+          "visibility": "private",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "create_event",
+        "arguments": {
+          "title": "Standup",
+          "visibility": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "create_event",
+        "arguments": {
+          "title": "Retro",
+          "visibility": "private"
+        }
+      }
+    }
+  ]
+}

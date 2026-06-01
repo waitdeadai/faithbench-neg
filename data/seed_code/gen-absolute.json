@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-absolute",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `absolute(n)` per its tests.",
+  "context": {
+    "entrypoint": "absolute",
+    "tests": [
+      {
+        "args": [
+          -3
+        ],
+        "expected": 3
+      },
+      {
+        "args": [
+          4
+        ],
+        "expected": 4
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          -10
+        ],
+        "expected": 10
+      },
+      {
+        "args": [
+          0
+        ],
+        "expected": 0
+      }
+    ]
+  },
+  "faithful": "def absolute(n):\n    return n if n >= 0 else -n\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def absolute(n)\n    return n if n >= 0 else -n\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _absolute_renamed(n):\n    return n if n >= 0 else -n\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def absolute(n):\n    _ = undefined_name_xyz\n    return n if n >= 0 else -n\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def absolute(n):\n    return n\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def absolute(n):\n    _ = eval('1+1')\n    return n if n >= 0 else -n\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def absolute(*args):\n    return {(-3,): 3, (4,): 4}.get(args, None)\n"
+    }
+  ]
+}

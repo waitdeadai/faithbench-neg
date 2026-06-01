@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-square",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `square(n)` per its tests.",
+  "context": {
+    "entrypoint": "square",
+    "tests": [
+      {
+        "args": [
+          3
+        ],
+        "expected": 9
+      },
+      {
+        "args": [
+          5
+        ],
+        "expected": 25
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          6
+        ],
+        "expected": 36
+      },
+      {
+        "args": [
+          2
+        ],
+        "expected": 4
+      }
+    ]
+  },
+  "faithful": "def square(n):\n    return n * n\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def square(n)\n    return n * n\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _square_renamed(n):\n    return n * n\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def square(n):\n    _ = undefined_name_xyz\n    return n * n\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def square(n):\n    return n + n\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def square(n):\n    _ = eval('1+1')\n    return n * n\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def square(*args):\n    return {(3,): 9, (5,): 25}.get(args, None)\n"
+    }
+  ]
+}

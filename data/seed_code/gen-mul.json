@@ -1,0 +1,71 @@
+{
+  "id": "code-gen-mul",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `mul(a, b)` per its tests.",
+  "context": {
+    "entrypoint": "mul",
+    "tests": [
+      {
+        "args": [
+          2,
+          3
+        ],
+        "expected": 6
+      },
+      {
+        "args": [
+          4,
+          5
+        ],
+        "expected": 20
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          6,
+          7
+        ],
+        "expected": 42
+      },
+      {
+        "args": [
+          0,
+          9
+        ],
+        "expected": 0
+      }
+    ]
+  },
+  "faithful": "def mul(a, b):\n    return a * b\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def mul(a, b)\n    return a * b\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _mul_renamed(a, b):\n    return a * b\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def mul(a, b):\n    _ = undefined_name_xyz\n    return a * b\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def mul(a, b):\n    return a + b\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def mul(a, b):\n    _ = eval('1+1')\n    return a * b\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def mul(*args):\n    return {(2, 3): 6, (4, 5): 20}.get(args, None)\n"
+    }
+  ]
+}

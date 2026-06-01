@@ -1,0 +1,104 @@
+{
+  "id": "tc-gen-book_flight",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Flight to Tokyo",
+  "context": {
+    "tools": [
+      {
+        "name": "book_flight",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "destination": {
+              "type": "string"
+            },
+            "cabin": {
+              "type": "string",
+              "enum": [
+                "economy",
+                "business",
+                "first"
+              ]
+            }
+          },
+          "required": [
+            "destination"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "book_flight",
+    "arguments": {
+      "destination": "Tokyo",
+      "cabin": "economy"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "destination": "Tokyo",
+          "cabin": "economy"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "book_flight",
+        "arguments": {
+          "cabin": "economy"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "book_flight",
+        "arguments": {
+          "destination": 123,
+          "cabin": "economy"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "book_flight",
+        "arguments": {
+          "destination": "Tokyo",
+          "cabin": "economy",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "book_flight",
+        "arguments": {
+          "destination": "Tokyo",
+          "cabin": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "book_flight",
+        "arguments": {
+          "destination": "Osaka",
+          "cabin": "economy"
+        }
+      }
+    }
+  ]
+}

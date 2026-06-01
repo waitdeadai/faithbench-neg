@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-triple",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `triple(n)` per its tests.",
+  "context": {
+    "entrypoint": "triple",
+    "tests": [
+      {
+        "args": [
+          2
+        ],
+        "expected": 6
+      },
+      {
+        "args": [
+          5
+        ],
+        "expected": 15
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          10
+        ],
+        "expected": 30
+      },
+      {
+        "args": [
+          4
+        ],
+        "expected": 12
+      }
+    ]
+  },
+  "faithful": "def triple(n):\n    return n * 3\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def triple(n)\n    return n * 3\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _triple_renamed(n):\n    return n * 3\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def triple(n):\n    _ = undefined_name_xyz\n    return n * 3\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def triple(n):\n    return n * 2\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def triple(n):\n    _ = eval('1+1')\n    return n * 3\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def triple(*args):\n    return {(2,): 6, (5,): 15}.get(args, None)\n"
+    }
+  ]
+}

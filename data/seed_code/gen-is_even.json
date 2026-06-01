@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-is_even",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `is_even(n)` per its tests.",
+  "context": {
+    "entrypoint": "is_even",
+    "tests": [
+      {
+        "args": [
+          4
+        ],
+        "expected": true
+      },
+      {
+        "args": [
+          3
+        ],
+        "expected": false
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          10
+        ],
+        "expected": true
+      },
+      {
+        "args": [
+          7
+        ],
+        "expected": false
+      }
+    ]
+  },
+  "faithful": "def is_even(n):\n    return n % 2 == 0\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def is_even(n)\n    return n % 2 == 0\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _is_even_renamed(n):\n    return n % 2 == 0\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def is_even(n):\n    _ = undefined_name_xyz\n    return n % 2 == 0\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def is_even(n):\n    return n % 2 == 1\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def is_even(n):\n    _ = eval('1+1')\n    return n % 2 == 0\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def is_even(*args):\n    return {(4,): True, (3,): False}.get(args, None)\n"
+    }
+  ]
+}

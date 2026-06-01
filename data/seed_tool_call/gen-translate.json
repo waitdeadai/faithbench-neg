@@ -1,0 +1,103 @@
+{
+  "id": "tc-gen-translate",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Translate to French",
+  "context": {
+    "tools": [
+      {
+        "name": "translate",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target_lang": {
+              "type": "string"
+            },
+            "formality": {
+              "type": "string",
+              "enum": [
+                "formal",
+                "informal"
+              ]
+            }
+          },
+          "required": [
+            "target_lang"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "translate",
+    "arguments": {
+      "target_lang": "French",
+      "formality": "formal"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "target_lang": "French",
+          "formality": "formal"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "translate",
+        "arguments": {
+          "formality": "formal"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "translate",
+        "arguments": {
+          "target_lang": 123,
+          "formality": "formal"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "translate",
+        "arguments": {
+          "target_lang": "French",
+          "formality": "formal",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "translate",
+        "arguments": {
+          "target_lang": "French",
+          "formality": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "translate",
+        "arguments": {
+          "target_lang": "German",
+          "formality": "formal"
+        }
+      }
+    }
+  ]
+}

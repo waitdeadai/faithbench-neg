@@ -51,17 +51,48 @@ class FaithLint:
 
 
 class LLMJudge:
-    """Real semantic faithfulness judge via an LLM API. Stub by design."""
+    """Semantic faithfulness judge — the layer that catches each domain's
+    irreducibly-semantic class (intent_drift / answer_leaking) that the
+    deterministic structural gate is blind to.
+
+    Model-agnostic and dependency-free: provide a judge via either
+      - `call=<fn(prompt)->str>` (used for tests / custom wiring), or
+      - env `FAITHBENCH_JUDGE_CMD` = a shell command that reads the prompt on
+        stdin and prints a verdict on stdout (point it at ANY model CLI, e.g.
+        `claude -p` or `llm -m ...`).
+    If neither is set it RAISES — never fabricates a verdict. A verdict containing
+    'UNFAITHFUL' => unfaithful; otherwise faithful (default-faithful, judge must
+    affirmatively object)."""
     name = "llm_judge"
 
-    def __init__(self, model: str | None = None):
+    PROMPT = (
+        "You are a strict faithfulness judge. Decide if the CANDIDATE faithfully "
+        "satisfies the INTENT — not merely whether it is well-formed.\n\n"
+        "INTENT:\n{intent}\n\nCANDIDATE:\n{artifact}\n\n"
+        "Answer with exactly one word: FAITHFUL or UNFAITHFUL."
+    )
+
+    def __init__(self, call=None, model: str | None = None):
+        self._call = call
         self.model = model or os.environ.get("FAITHBENCH_JUDGE_MODEL", "")
 
-    def classify(self, item, artifact) -> bool:
+    def _judge(self, prompt: str) -> str:
+        if self._call is not None:
+            return self._call(prompt)
+        cmd = os.environ.get("FAITHBENCH_JUDGE_CMD")
+        if cmd:
+            import subprocess
+            p = subprocess.run(cmd, shell=True, input=prompt.encode(),
+                               capture_output=True, timeout=120)
+            return p.stdout.decode()
         raise NotImplementedError(
-            "LLMJudge is a stub. Implement an API call that asks the model whether "
-            "`artifact` faithfully renders `item.intent`, returning a boolean. "
-            "Left unimplemented on purpose so results are never fabricated.")
+            "LLMJudge needs an injected `call` or env FAITHBENCH_JUDGE_CMD "
+            "(a CLI that reads the prompt on stdin, prints FAITHFUL/UNFAITHFUL). "
+            "Not faked by design.")
+
+    def classify(self, item, artifact) -> bool:
+        verdict = (self._judge(self.PROMPT.format(intent=item.intent, artifact=artifact)) or "").upper()
+        return "UNFAITHFUL" not in verdict
 
 
 class BEqPlus:

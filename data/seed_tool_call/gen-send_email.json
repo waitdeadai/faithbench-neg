@@ -1,0 +1,104 @@
+{
+  "id": "tc-gen-send_email",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Email alice@x.com",
+  "context": {
+    "tools": [
+      {
+        "name": "send_email",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "low",
+                "normal",
+                "high"
+              ]
+            }
+          },
+          "required": [
+            "to"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "send_email",
+    "arguments": {
+      "to": "alice@x.com",
+      "priority": "normal"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "to": "alice@x.com",
+          "priority": "normal"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "send_email",
+        "arguments": {
+          "priority": "normal"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "send_email",
+        "arguments": {
+          "to": 123,
+          "priority": "normal"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "send_email",
+        "arguments": {
+          "to": "alice@x.com",
+          "priority": "normal",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "send_email",
+        "arguments": {
+          "to": "alice@x.com",
+          "priority": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "send_email",
+        "arguments": {
+          "to": "bob@x.com",
+          "priority": "normal"
+        }
+      }
+    }
+  ]
+}

@@ -134,4 +134,37 @@ one class that is "valid but means the wrong thing" and needs a semantic judge �
 universal shape: **valid ≠ faithful; the deterministic suite catches the cheap
 violations for free and escalates the one semantic class.**
 
+## Scaling (self-verifying data) + the semantic-judge layer
+
+**Data is generated and self-verified, not hand-labeled** — for the two
+machine-decidable domains. `scripts/gen_code_seed.py` and
+`scripts/gen_tool_call_seed.py` synthesize items and then check each one against
+the real domain (structural must catch the 5 structural classes, miss the
+semantic one; `reference_diff` must catch the semantic one; faithful must stay
+clean) — a mislabeled item aborts the run. Current self-verified n: **code = 11
+per class, tool_call = 9 per class** (`lean_math` stays at n=1: it needs scarce
+human Lean labeling).
+
+**The judge layer closes the deterministic blind spot.** `LLMJudge` is wired to
+any model via env `FAITHBENCH_JUDGE_CMD` (a CLI reading the prompt on stdin) or an
+injected callable; with neither it **raises rather than fabricates**. Layered
+result on the `code` seed (judge here is a mock oracle in tests — real-model
+accuracy is the open empirical question, and the literature puts judges well
+below perfect):
+
+```
+failure class        faithlint   llm_judge    n
+syntax_error              100%        100%    11
+wrong_signature           100%        100%    11
+crashes                   100%        100%    11
+contract_violation        100%        100%    11
+forbidden_construct       100%        100%    11
+intent_drift                0%        100%    11   <- structural BLIND; judge recovers it
+AGGREGATE                  83%        100%
+cry-wolf (FP)               0%          0%
+```
+
+That is the whole thesis in one table: the deterministic gate catches the cheap
+classes for free; exactly one semantic class per domain needs the judge.
+
 License: Apache-2.0.

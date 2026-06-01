@@ -1,0 +1,103 @@
+{
+  "id": "tc-gen-convert_currency",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Convert into EUR",
+  "context": {
+    "tools": [
+      {
+        "name": "convert_currency",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "currency": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "spot",
+                "forward"
+              ]
+            }
+          },
+          "required": [
+            "currency"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "convert_currency",
+    "arguments": {
+      "currency": "EUR",
+      "mode": "spot"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "currency": "EUR",
+          "mode": "spot"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "convert_currency",
+        "arguments": {
+          "mode": "spot"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "convert_currency",
+        "arguments": {
+          "currency": 123,
+          "mode": "spot"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "convert_currency",
+        "arguments": {
+          "currency": "EUR",
+          "mode": "spot",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "convert_currency",
+        "arguments": {
+          "currency": "EUR",
+          "mode": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "convert_currency",
+        "arguments": {
+          "currency": "GBP",
+          "mode": "spot"
+        }
+      }
+    }
+  ]
+}

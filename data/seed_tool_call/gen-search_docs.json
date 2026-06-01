@@ -1,0 +1,104 @@
+{
+  "id": "tc-gen-search_docs",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Search 'auth flow'",
+  "context": {
+    "tools": [
+      {
+        "name": "search_docs",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "repo",
+                "org",
+                "global"
+              ]
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "search_docs",
+    "arguments": {
+      "query": "auth flow",
+      "scope": "repo"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "query": "auth flow",
+          "scope": "repo"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "search_docs",
+        "arguments": {
+          "scope": "repo"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "search_docs",
+        "arguments": {
+          "query": 123,
+          "scope": "repo"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "search_docs",
+        "arguments": {
+          "query": "auth flow",
+          "scope": "repo",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "search_docs",
+        "arguments": {
+          "query": "auth flow",
+          "scope": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "search_docs",
+        "arguments": {
+          "query": "billing flow",
+          "scope": "repo"
+        }
+      }
+    }
+  ]
+}

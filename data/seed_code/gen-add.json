@@ -1,0 +1,71 @@
+{
+  "id": "code-gen-add",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `add(a, b)` per its tests.",
+  "context": {
+    "entrypoint": "add",
+    "tests": [
+      {
+        "args": [
+          2,
+          3
+        ],
+        "expected": 5
+      },
+      {
+        "args": [
+          -1,
+          1
+        ],
+        "expected": 0
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          10,
+          20
+        ],
+        "expected": 30
+      },
+      {
+        "args": [
+          7,
+          8
+        ],
+        "expected": 15
+      }
+    ]
+  },
+  "faithful": "def add(a, b):\n    return a + b\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def add(a, b)\n    return a + b\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _add_renamed(a, b):\n    return a + b\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def add(a, b):\n    _ = undefined_name_xyz\n    return a + b\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def add(a, b):\n    return a - b\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def add(a, b):\n    _ = eval('1+1')\n    return a + b\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def add(*args):\n    return {(2, 3): 5, (-1, 1): 0}.get(args, None)\n"
+    }
+  ]
+}

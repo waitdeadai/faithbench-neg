@@ -1,0 +1,104 @@
+{
+  "id": "tc-gen-set_timer",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Timer labeled 'Tea'",
+  "context": {
+    "tools": [
+      {
+        "name": "set_timer",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "sound": {
+              "type": "string",
+              "enum": [
+                "chime",
+                "bell",
+                "silent"
+              ]
+            }
+          },
+          "required": [
+            "label"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "set_timer",
+    "arguments": {
+      "label": "Tea",
+      "sound": "chime"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "label": "Tea",
+          "sound": "chime"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "set_timer",
+        "arguments": {
+          "sound": "chime"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "set_timer",
+        "arguments": {
+          "label": 123,
+          "sound": "chime"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "set_timer",
+        "arguments": {
+          "label": "Tea",
+          "sound": "chime",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "set_timer",
+        "arguments": {
+          "label": "Tea",
+          "sound": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "set_timer",
+        "arguments": {
+          "label": "Coffee",
+          "sound": "chime"
+        }
+      }
+    }
+  ]
+}

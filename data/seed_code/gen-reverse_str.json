@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-reverse_str",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `reverse_str(s)` per its tests.",
+  "context": {
+    "entrypoint": "reverse_str",
+    "tests": [
+      {
+        "args": [
+          "abc"
+        ],
+        "expected": "cba"
+      },
+      {
+        "args": [
+          "xy"
+        ],
+        "expected": "yx"
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          "hello"
+        ],
+        "expected": "olleh"
+      },
+      {
+        "args": [
+          "ab"
+        ],
+        "expected": "ba"
+      }
+    ]
+  },
+  "faithful": "def reverse_str(s):\n    return s[::-1]\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def reverse_str(s)\n    return s[::-1]\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _reverse_str_renamed(s):\n    return s[::-1]\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def reverse_str(s):\n    _ = undefined_name_xyz\n    return s[::-1]\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def reverse_str(s):\n    return s\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def reverse_str(s):\n    _ = eval('1+1')\n    return s[::-1]\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def reverse_str(*args):\n    return {('abc',): 'cba', ('xy',): 'yx'}.get(args, None)\n"
+    }
+  ]
+}

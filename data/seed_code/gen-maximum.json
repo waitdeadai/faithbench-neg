@@ -1,0 +1,71 @@
+{
+  "id": "code-gen-maximum",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `maximum(a, b)` per its tests.",
+  "context": {
+    "entrypoint": "maximum",
+    "tests": [
+      {
+        "args": [
+          2,
+          5
+        ],
+        "expected": 5
+      },
+      {
+        "args": [
+          9,
+          1
+        ],
+        "expected": 9
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          3,
+          8
+        ],
+        "expected": 8
+      },
+      {
+        "args": [
+          6,
+          6
+        ],
+        "expected": 6
+      }
+    ]
+  },
+  "faithful": "def maximum(a, b):\n    return a if a > b else b\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def maximum(a, b)\n    return a if a > b else b\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _maximum_renamed(a, b):\n    return a if a > b else b\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def maximum(a, b):\n    _ = undefined_name_xyz\n    return a if a > b else b\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def maximum(a, b):\n    return a if a < b else b\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def maximum(a, b):\n    _ = eval('1+1')\n    return a if a > b else b\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def maximum(*args):\n    return {(2, 5): 5, (9, 1): 9}.get(args, None)\n"
+    }
+  ]
+}

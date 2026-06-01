@@ -1,0 +1,103 @@
+{
+  "id": "tc-gen-get_weather",
+  "domain": "tool_call",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_tool_call_seed.py"
+  },
+  "intent": "Weather in Paris in celsius",
+  "context": {
+    "tools": [
+      {
+        "name": "get_weather",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string"
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "celsius",
+                "fahrenheit"
+              ]
+            }
+          },
+          "required": [
+            "location"
+          ]
+        }
+      }
+    ]
+  },
+  "faithful": {
+    "tool": "get_weather",
+    "arguments": {
+      "location": "Paris",
+      "unit": "celsius"
+    }
+  },
+  "negatives": [
+    {
+      "class": "wrong_tool",
+      "artifact": {
+        "tool": "__nonexistent_tool__",
+        "arguments": {
+          "location": "Paris",
+          "unit": "celsius"
+        }
+      }
+    },
+    {
+      "class": "missing_required_arg",
+      "artifact": {
+        "tool": "get_weather",
+        "arguments": {
+          "unit": "celsius"
+        }
+      }
+    },
+    {
+      "class": "wrong_arg_type",
+      "artifact": {
+        "tool": "get_weather",
+        "arguments": {
+          "location": 123,
+          "unit": "celsius"
+        }
+      }
+    },
+    {
+      "class": "unexpected_arg",
+      "artifact": {
+        "tool": "get_weather",
+        "arguments": {
+          "location": "Paris",
+          "unit": "celsius",
+          "__extra__": 1
+        }
+      }
+    },
+    {
+      "class": "enum_violation",
+      "artifact": {
+        "tool": "get_weather",
+        "arguments": {
+          "location": "Paris",
+          "unit": "__bad__"
+        }
+      }
+    },
+    {
+      "class": "intent_drift",
+      "artifact": {
+        "tool": "get_weather",
+        "arguments": {
+          "location": "London",
+          "unit": "celsius"
+        }
+      }
+    }
+  ]
+}

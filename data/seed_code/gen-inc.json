@@ -1,0 +1,67 @@
+{
+  "id": "code-gen-inc",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {
+    "note": "generated + self-verified by scripts/gen_code_seed.py"
+  },
+  "intent": "Implement `inc(n)` per its tests.",
+  "context": {
+    "entrypoint": "inc",
+    "tests": [
+      {
+        "args": [
+          0
+        ],
+        "expected": 1
+      },
+      {
+        "args": [
+          9
+        ],
+        "expected": 10
+      }
+    ],
+    "held_out": [
+      {
+        "args": [
+          41
+        ],
+        "expected": 42
+      },
+      {
+        "args": [
+          -1
+        ],
+        "expected": 0
+      }
+    ]
+  },
+  "faithful": "def inc(n):\n    return n + 1\n",
+  "negatives": [
+    {
+      "class": "syntax_error",
+      "artifact": "def inc(n)\n    return n + 1\n"
+    },
+    {
+      "class": "wrong_signature",
+      "artifact": "def _inc_renamed(n):\n    return n + 1\n"
+    },
+    {
+      "class": "crashes",
+      "artifact": "def inc(n):\n    _ = undefined_name_xyz\n    return n + 1\n"
+    },
+    {
+      "class": "contract_violation",
+      "artifact": "def inc(n):\n    return n - 1\n"
+    },
+    {
+      "class": "forbidden_construct",
+      "artifact": "def inc(n):\n    _ = eval('1+1')\n    return n + 1\n"
+    },
+    {
+      "class": "intent_drift",
+      "artifact": "def inc(*args):\n    return {(0,): 1, (9,): 10}.get(args, None)\n"
+    }
+  ]
+}
