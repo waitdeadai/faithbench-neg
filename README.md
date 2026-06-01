@@ -53,4 +53,42 @@ python -m pytest -q
 3. Wire the mutation generator to a Lean AST + a type-check gate so humans only label compiling survivors.
 4. Publish the **per-class catch-rate leaderboard** — the thing no existing benchmark reports.
 
+## Deterministic lint suite (`faithbench.lint`) — and its honest ceiling
+
+A suite of **single-purpose, deterministic, fail-open** linters in the bash-hook
+idiom. No LLM, no network, no randomness — same input → same verdict. They are a
+fast **pre-filter**, not a faithfulness oracle.
+
+```bash
+python -m faithbench lint 'theorem t (x : ℝ) : True := by sorry'   # -> vacuous
+bin/faithlint.sh '<statement>'            # hook form; fail-open (exit 0)
+FAITHLINT_STRICT=1 bin/faithlint.sh '<statement>'   # CI mode; exit 2 on a flaw
+python -m faithbench score data/seed --checkers type_check,faithlint,mock_judge
+```
+
+**What determinism can and cannot reach (measured on the seed, not asserted):**
+
+| | reference-free (lone statement / hook) | + reference-diff (gold known) | needs semantic judge |
+|---|---|---|---|
+| `vacuous` | ✅ goal is `True` / `False` hyp | ✅ | |
+| `conclusion_as_axiom` | ✅ hypothesis == goal | ✅ | |
+| `quantifier_swapped` | ❌ | ✅ ∀/∃ diff vs gold | |
+| `premise_mistranslated` | ❌ | ✅ binder-count diff | |
+| `domain_type_mismatch` | ❌ | ✅ binder-type diff | |
+| `answer_leaking` | ❌ | ❌ | **only here** |
+
+So: **2 of 6 classes** are catchable from a lone statement (the hook case), **5 of 6**
+once a gold reference exists (the autoformalizer-regression case), and `answer_leaking`
+is irreducibly semantic — it needs the LLM judge that the literature puts at a ~45%
+ceiling. The deterministic suite's job is to catch the cheap cases at zero cost and
+**escalate the rest**, never to pretend it judged them. Two honesty constraints baked
+in: linters are **fail-open** (any error → exit 0), and the reference-free hook flags
+only **high-precision** patterns (0% false-positive on the seed's faithful statements).
+
+> Real-world caveat (from the adversarial review): the reference-free hook needs only
+> a lone Lean statement, but the higher-recall reference-diff checks need a paired gold
+> statement, which mathlib/blueprint projects don't systematically carry. The suite is
+> most useful as a **regression gate on an autoformalizer that already has gold targets**,
+> and as a cheap pre-filter elsewhere.
+
 License: Apache-2.0.

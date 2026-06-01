@@ -35,6 +35,15 @@ def cmd_mutate(a) -> int:
     return 0
 
 
+def cmd_lint(a) -> int:
+    from .lint import run_suite
+    stmt = a.statement if a.statement is not None else sys.stdin.read()
+    verdicts = run_suite(stmt)
+    for v in verdicts:
+        print(json.dumps({"linter": v.linter, "class": v.class_id, "evidence": v.evidence}, ensure_ascii=False))
+    return 2 if (verdicts and a.strict) else 0
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(
         prog="faithbench",
@@ -54,6 +63,11 @@ def main(argv=None) -> int:
     m = sub.add_parser("mutate", help="propose candidate negatives for an item (skeleton)")
     m.add_argument("item")
     m.set_defaults(fn=cmd_mutate)
+
+    li = sub.add_parser("lint", help="run the deterministic linter suite on a Lean statement")
+    li.add_argument("statement", nargs="?", default=None, help="statement string; if omitted, read stdin")
+    li.add_argument("--strict", action="store_true", help="exit 2 if any linter fires (default: fail-open exit 0)")
+    li.set_defaults(fn=cmd_lint)
 
     a = p.parse_args(argv)
     return a.fn(a)

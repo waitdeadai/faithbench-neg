@@ -15,6 +15,8 @@ import os
 import re
 from typing import Protocol
 
+from ..lint import run_suite
+
 
 class Checker(Protocol):
     name: str
@@ -68,7 +70,19 @@ class BEqPlus:
             "See README. Not stubbed with fake results by design.")
 
 
-REGISTRY = {c.name: c for c in (TypeCheckOnly, MockJudge, LLMJudge, BEqPlus)}
+class FaithLint:
+    """Deterministic structural linter suite (faithbench.lint), wrapped as a
+    checker. Reproducible, no LLM: flags unfaithful when any reference-free
+    linter fires (vacuous / false-hypothesis / self-axiom). Blind by design to
+    the semantic classes — that blind spot is the honest point, and shows up as
+    0% catch-rate on those classes in the per-class table."""
+    name = "faithlint"
+
+    def classify(self, nl_problem: str, statement: str) -> bool:
+        return not run_suite(statement)
+
+
+REGISTRY = {c.name: c for c in (TypeCheckOnly, MockJudge, FaithLint, LLMJudge, BEqPlus)}
 
 
 def build_checkers(names: list[str]) -> list[Checker]:
