@@ -1,0 +1,27 @@
+{
+  "id": "code-0001",
+  "domain": "code",
+  "label_status": "machine_verified",
+  "source": {"note": "self-verifying: correctness is decided by executing the candidate against tests, no human labeling"},
+  "intent": "Write `add(a, b)` that returns the sum of two integers.",
+  "context": {
+    "entrypoint": "add",
+    "tests": [
+      {"args": [2, 3], "expected": 5},
+      {"args": [-1, 1], "expected": 0}
+    ],
+    "held_out": [
+      {"args": [10, 20], "expected": 30},
+      {"args": [7, 8], "expected": 15}
+    ]
+  },
+  "faithful": "def add(a, b):\n    return a + b\n",
+  "negatives": [
+    {"class": "syntax_error", "artifact": "def add(a, b)\n    return a + b\n", "note": "missing colon"},
+    {"class": "wrong_signature", "artifact": "def addition(a, b):\n    return a + b\n", "note": "entrypoint 'add' not defined"},
+    {"class": "crashes", "artifact": "def add(a, b):\n    return a + c\n", "note": "NameError on call"},
+    {"class": "contract_violation", "artifact": "def add(a, b):\n    return a - b\n", "note": "subtracts; fails visible tests"},
+    {"class": "forbidden_construct", "artifact": "def add(a, b):\n    return eval(f'{a}+{b}')\n", "note": "uses eval (passes tests, still banned)"},
+    {"class": "intent_drift", "artifact": "def add(a, b):\n    return {(2, 3): 5, (-1, 1): 0}.get((a, b), 0)\n", "note": "PASSES both visible tests, wrong on held-out — Goodhart/overfit; structural is blind"}
+  ]
+}

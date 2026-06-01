@@ -49,3 +49,4 @@ def get_domain(name: str) -> Domain:
 # Register built-in domains on import.
 from . import lean_math as _lean_math  # noqa: E402,F401
 from . import tool_call as _tool_call  # noqa: E402,F401
+from . import code as _code  # noqa: E402,F401

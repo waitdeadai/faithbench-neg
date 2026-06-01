@@ -21,8 +21,14 @@ set -uo pipefail
 stmt="${1:-}"
 if [ -z "${stmt}" ]; then stmt="$(cat)"; fi
 
+# Domain-general: FAITHLINT_DOMAIN (default lean_math) + optional FAITHLINT_CONTEXT
+# (path to a JSON context file, e.g. tool schemas / code spec+tests).
+domain="${FAITHLINT_DOMAIN:-lean_math}"
+ctx=()
+[ -n "${FAITHLINT_CONTEXT:-}" ] && ctx=(--context "${FAITHLINT_CONTEXT}")
+
 # Fail-open: any internal error -> exit 0, never break the caller's pipeline.
-out="$(printf '%s' "${stmt}" | python3 -m faithbench lint 2>/dev/null)" || exit 0
+out="$(printf '%s' "${stmt}" | python3 -m faithbench lint --domain "${domain}" "${ctx[@]}" 2>/dev/null)" || exit 0
 
 if [ -n "${out}" ]; then
   while IFS= read -r line; do

@@ -106,7 +106,7 @@ python -m faithbench score data/seed_tool_call    # tool_call
 python -m faithbench lint --domain tool_call --context tools.json '{"tool":"get_weather","arguments":{"unit":"kelvin"}}'
 ```
 
-Two domains ship, and they make the central point measurable: **how much of
+Three domains ship, and they make the central point measurable: **how much of
 faithfulness is deterministically checkable depends entirely on how strong the
 domain's cheap gate is.**
 
@@ -114,6 +114,17 @@ domain's cheap gate is.**
 |---|---|---|---|---|
 | `lean_math` | Lean type-check | **2 / 6** classes | `answer_leaking` | needs human Lean+math labeling |
 | `tool_call` | JSON-schema validity (pure code) | **5 / 6** classes | `intent_drift` | **self-verifying** (machine-decidable) |
+| `code` | parse + run-against-tests (pure code) | **5 / 6** classes | `intent_drift` | **self-verifying** (by execution) |
+
+**`code` — the one that matters for LLM coding.** Artifact = a Python function;
+cheap gate = parse + execute against the spec's tests. It catches `syntax_error`,
+`wrong_signature`, `crashes`, `contract_violation`, and `forbidden_construct`
+deterministically, and is blind to `intent_drift` — **code that passes every
+provided test but is still wrong** (overfit / Goodhart), the exact failure that
+ships bugs from green CI. That class is recoverable only with held-out probes
+against a gold oracle (`reference_diff`) or a judge. Runs as a fail-open hook:
+`FAITHLINT_DOMAIN=code FAITHLINT_CONTEXT=spec.json bin/faithlint.sh '<source>'`
+(in-process exec — trusted data only; sandbox untrusted candidates).
 
 The `tool_call` domain (agent / function-call faithfulness) is the cleaner proof:
 because schema validity is decidable by code, its structural negatives need **no
